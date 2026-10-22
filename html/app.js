@@ -930,14 +930,37 @@ Poller.prototype.tick=function(){
   if(!self.on)return;
   var quiet=document.hidden||Date.now()-lastInput>IDLE_STOP_MS;
   var run=quiet?Promise.resolve():Promise.resolve().then(self.fn).catch(function(){});
-  run.then(function(){ if(self.on)self.t=setTimeout(function(){self.tick()},self.ms); });
+  run.then(function(){
+    if(self.on){
+      var jitter=self.ms*(0.85+Math.random()*0.3);
+      self.t=setTimeout(function(){self.tick()},jitter);
+    }
+  });
 };
 
+var sfpGlitch={};
 function byPort(a){return a.sort(function(x,y){return x.portNum-y.portNum})}
 function pollStatus(){
   return getJSON("/status.json").then(function(s){
     byPort(s);
     var now=Date.now();
+    s.forEach(function(p){
+      if(p.isSFP){
+        if(!p.enabled){
+          sfpGlitch[p.portNum]=(sfpGlitch[p.portNum]||0)+1;
+          if(sfpGlitch[p.portNum]===1&&S.ports&&S.ports[p.portNum-1]&&S.ports[p.portNum-1].enabled){
+            p.enabled=1;
+            var prev=S.ports[p.portNum-1];
+            if(prev.link>0&&!p.link)p.link=prev.link;
+            for(var k in prev){
+              if(k.indexOf("sfp_")===0&&prev[k]!=null&&p[k]==null)p[k]=prev[k];
+            }
+          }
+        }else{
+          sfpGlitch[p.portNum]=0;
+        }
+      }
+    });
     if(!S.n){
       S.n=s.length;
       var slot=0;
