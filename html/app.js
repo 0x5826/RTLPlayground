@@ -749,6 +749,7 @@ function h(tag,attrs,kids){
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function badge(txt,cls){return'<span class="badge'+(cls?" "+cls:"")+'">'+esc(txt)+"</span>"}
 function linkBadge(p){
+  if(p.isSFP)return p.link>0?badge(LINKS[p.link],"ok"):badge(t("c_down"));
   return!p.enabled?badge(t("c_off")):(p.link>0?badge(LINKS[p.link],"ok"):badge(t("c_down")));
 }
 
@@ -992,11 +993,11 @@ function updateStrip(){
   S.ports.forEach(function(p){
     var i=p.portNum-1,el=$("pp"+i),lb=$("ppl"+i);
     if(!el)return;
-    el.classList.toggle("dis",!p.enabled);
-    var up=p.enabled&&p.link>0;
+    el.classList.toggle("dis",!p.isSFP&&!p.enabled);
+    var up=(p.isSFP||p.enabled)&&p.link>0;
     el.classList.toggle("up",!!up);
     if(up)el.style.setProperty("--pc","var("+(LINKC[p.link]||"--s1000")+")");
-    lb.textContent=!p.enabled?t("c_off"):(p.link>0?LINKS[p.link]:t("c_down"));
+    lb.textContent=p.isSFP?(p.link>0?LINKS[p.link]:t("c_down")):(!p.enabled?t("c_off"):(p.link>0?LINKS[p.link]:t("c_down")));
     el.title=portRows(p).map(function(r){return r[0]+": "+r[1]}).join("\n");
   });
   if(S.detail!=null){var b=$("mbody");b.innerHTML="";b.appendChild(detailTable(S.ports[S.detail]));}
@@ -1023,7 +1024,8 @@ function dBm(mw){return 10*Math.log10(Math.max(mw,1e-4))}
 function portRows(p){
   var rows=[[t("c_port"),String(p.portNum)],[t("c_type"),p.isSFP?"SFP":"RJ45"]];
   if(p.name)rows.push([t("c_name"),p.name]);
-  rows.push([t("p_state"),!p.enabled?t("p_disabled"):(p.link>0?t("p_up")+" "+LINKS[p.link]:t("c_down"))]);
+  var st=p.isSFP?(p.link>0?t("p_up")+" "+LINKS[p.link]:t("c_down")):(!p.enabled?t("p_disabled"):(p.link>0?t("p_up")+" "+LINKS[p.link]:t("c_down")));
+  rows.push([t("p_state"),st]);
   rows.push([t("p_txgb"),BigInt(p.txG)+" / "+BigInt(p.txB)+" "+t("p_pkts")]);
   rows.push([t("p_rxgb"),BigInt(p.rxG)+" / "+BigInt(p.rxB)+" "+t("p_pkts")]);
   if(p.isSFP){
@@ -1137,7 +1139,8 @@ function buildPorts(){
     var mc=tr.insertCell();mc.id="pmac"+i;mc.className="mono";mc.textContent="-";
     tr.insertCell().appendChild(spd);
     var sw=h("label",{class:"switch"},[h("input",{type:"checkbox",id:"pen"+i}),h("i")]);
-    sw.firstChild.checked=!!p.enabled;
+    sw.firstChild.checked=p.isSFP?true:!!p.enabled;
+    if(p.isSFP)sw.firstChild.disabled=true;
     tr.insertCell().appendChild(sw);
     tr.insertCell().appendChild(h("input",{class:"in sm",id:"pmtu"+i,type:"number",min:"64",max:"16383"}));
     tr.insertCell().appendChild(h("button",{class:"ctl",text:t("c_apply"),onclick:function(){applyPort(i)}}));
@@ -1174,11 +1177,12 @@ function applyPort(i){
     if(!/^\S{1,15}$/.test(name)){toast(t("pt_name_err"),"err");return;}
     cmds.push("port "+p.portNum+" name "+name);
   }
-  if(!en)cmds.push("port "+p.portNum+" off");
-  else if(p.isSFP){
-    if(!p.enabled)cmds.push("port "+p.portNum+" on");
+  if(!p.isSFP){
+    if(!en)cmds.push("port "+p.portNum+" off");
+    else cmds.push("port "+p.portNum+" "+spd);
+  }else{
     cmds.push("sfp "+S.sfpSlot[i]+" "+spd);
-  }else cmds.push("port "+p.portNum+" "+spd);
+  }
   if(mtu&&mtu!==S.mtu[i]){
     if(mtu<64||mtu>16383){toast(t("pt_mtu_err"),"err");return;}
     cmds.push("mtu "+p.portNum+" "+mtu);
