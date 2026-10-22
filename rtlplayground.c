@@ -1646,15 +1646,21 @@ void main(void)
 			uip_ethaddr.addr[4] = flash_buf[4]; uip_ethaddr.addr[5] = flash_buf[5];
 		}
 	}
-	if (uip_ethaddr.addr[0] == 0xff) {  // no valid flash MAC -> generate locally-administered
+	if (uip_ethaddr.addr[0] == 0xff) {  // no valid flash MAC -> generate locally-administered / machine fallback
+		if (machine.mac_prefix[0] | machine.mac_prefix[1] | machine.mac_prefix[2]) {
+			uip_ethaddr.addr[0] = machine.mac_prefix[0];
+			uip_ethaddr.addr[1] = machine.mac_prefix[1];
+			uip_ethaddr.addr[2] = machine.mac_prefix[2];
+		} else {
+			uip_ethaddr.addr[0] = 0x06;  // LAA prefix
+			reg_read_m(RTL837X_REG_CHIP_LOT_NO);
+			uip_ethaddr.addr[1] = sfr_data[0] ^ sfr_data[2];
+			uip_ethaddr.addr[2] = sfr_data[1] ^ sfr_data[3];
+		}
 		reg_read_m(RTL837X_REG_CHIP_UUID);
-		uip_ethaddr.addr[0] = 0x06;  // LAA prefix
 		uip_ethaddr.addr[3] = sfr_data[0] ^ sfr_data[3];
 		uip_ethaddr.addr[4] = sfr_data[1] ^ sfr_data[3];
 		uip_ethaddr.addr[5] = sfr_data[2] ^ sfr_data[3];
-		reg_read_m(RTL837X_REG_CHIP_LOT_NO);
-		uip_ethaddr.addr[1] = sfr_data[0] ^ sfr_data[2];
-		uip_ethaddr.addr[2] = sfr_data[1] ^ sfr_data[3];
 	}
 	print_string("Setting MAC to: ");
 	print_byte(uip_ethaddr.addr[0]); write_char(':'); print_byte(uip_ethaddr.addr[1]); write_char(':');

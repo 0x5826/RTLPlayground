@@ -110,6 +110,7 @@ struct machine {
 	// random resets. Costs management-plane speed only, the ASIC keeps
 	// forwarding in hardware.
 	uint8_t flash_sio;
+	uint8_t mac_prefix[3];
 };
 
 struct machine_runtime
