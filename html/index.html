@@ -482,7 +482,10 @@ button.danger{background:var(--bad);color:#fff;border-color:transparent}
         </div>
       </div>
       <div class="card dangerzone" style="margin-top:16px"><h2 data-i18n="sy_maint">Maintenance</h2>
-        <button class="ctl danger" id="sy-reboot" data-i18n="sy_reboot">Reboot switch</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="ctl danger" id="sy-reboot" data-i18n="sy_reboot">Reboot switch</button>
+          <button class="ctl danger" id="sy-factory-reset" data-i18n="sy_factory_reset">Reset to defaults</button>
+        </div>
       </div>
     </section>
 

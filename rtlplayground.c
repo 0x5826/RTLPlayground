@@ -1741,6 +1741,7 @@ void main(void)
 	port_stats_print();
 
 	early_boot_handle_button();
+	early_boot_handle_recovery_loop();
 
 	execute_config();
 	// After the config so the entry lands in the final management VLAN

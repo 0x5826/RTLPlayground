@@ -16,6 +16,8 @@
 #include "machine.h"
 #include "phy.h"
 #include "boot.h"
+#include "rtl837x_nic.h"
+#include "uip/uip.h"
 
 extern __code const struct machine machine;
 extern __xdata struct machine_runtime machine_detected;
@@ -24,6 +26,9 @@ extern volatile __xdata uint32_t ticks;
 __xdata uint32_t rtl8224_release_tick;
 extern __xdata uint8_t tx_seq;
 extern __code const uint8_t * __code const hex;
+extern __xdata uint8_t uip_buf[];
+extern __xdata uint8_t rx_headers[];
+extern void tcpip_output(void);
 
 
 
@@ -111,6 +116,164 @@ void early_boot_handle_button(void) __banked
 		set_sys_led_state(SYS_LED_FAST);
 		flash_default_config();
 		delay(3UL * SYS_TICK_HZ);
+	}
+}
+
+static bool check_magic(void)
+{
+	for (uint8_t k = 12; k < 40; k++) {
+		if (uip_buf[k] == 'R' && uip_buf[k + 1] == 'T' &&
+		    uip_buf[k + 2] == 'L' && uip_buf[k + 3] == 'D' &&
+		    uip_buf[k + 4] == 'E' && uip_buf[k + 5] == 'B' &&
+		    uip_buf[k + 6] == 'R' && uip_buf[k + 7] == 'K')
+			return true;
+	}
+	return false;
+}
+
+static bool probe_loopback(uint8_t p1, uint8_t p2)
+{
+	bool matched = false;
+	// Purge existing RX ring entries
+	while (1) {
+		reg_read(RTL837X_REG_NIC_RX_BUFF_DATA);
+		if (!SFR_DATA_U16)
+			break;
+		REG_SET(RTL837X_REG_NIC_RXCMD, 1);
+	}
+
+	// Prepare probe frame in uip_buf (offset by RTL_FRAME_DESC_SIZE for TX descriptor)
+	__xdata uint8_t *pkt = &uip_buf[RTL_FRAME_DESC_SIZE];
+
+	// DST MAC (broadcast) + SRC MAC (uip_ethaddr)
+	for (uint8_t i = 0; i < 6; i++) {
+		pkt[i] = 0xff;
+		pkt[i + 6] = uip_ethaddr.addr[i];
+	}
+	// RTL CPU Tag (8 bytes): send only to physical port p1
+	pkt[12] = 0x88; pkt[13] = 0x99; // RTL_FRAME_TAG_ID
+	pkt[14] = 0x04; pkt[15] = 0x00; // version 4, reason 0
+	pkt[16] = 0x00; pkt[17] = 0x20; // flags: RTL_TAG_LEARN_DIS
+	pkt[18] = 0x00; pkt[19] = (1 << p1); // pmask: port p1
+
+	// Custom EtherType and Magic string
+	pkt[20] = 0xff; pkt[21] = 0xfe;
+	pkt[22] = 'R'; pkt[23] = 'T'; pkt[24] = 'L'; pkt[25] = 'D';
+	pkt[26] = 'E'; pkt[27] = 'B'; pkt[28] = 'R'; pkt[29] = 'K';
+
+	for (uint8_t i = 30; i < 60; i++)
+		pkt[i] = 0;
+
+	uip_len = 60;
+	tcpip_output();
+
+	// Wait up to 50 ms for frame arrival on port p2
+	__xdata uint32_t t_start = ticks;
+	while (!matched && ((ticks - t_start) < (SYS_TICK_HZ / 20))) {
+		reg_read(RTL837X_REG_NIC_RX_BUFF_DATA);
+		if (SFR_DATA_U16) {
+			reg_read(RTL837X_REG_CPU_RX_CURR_PKT);
+			uint16_t ring_ptr = SFR_DATA_U16 << 3;
+			if (nic_rx_header(ring_ptr)) {
+				uint8_t rx_port = rx_headers[3] & 0x0f;
+				if (rx_port == p2) {
+					if (nic_rx_packet(uip_buf, ring_ptr + 8)) {
+						if (check_magic())
+							matched = true;
+					}
+				}
+			}
+			REG_SET(RTL837X_REG_NIC_RXCMD, 1);
+		}
+	}
+	return matched;
+}
+
+void early_boot_handle_recovery_loop(void) __banked
+{
+	uint8_t p1 = 0xff, p2 = 0xff;
+	for (uint8_t i = machine.min_port; i <= machine.max_port; i++) {
+		if (machine.is_sfp[i])
+			continue;
+		if (p1 == 0xff) {
+			p1 = i;
+		} else if (p2 == 0xff) {
+			p2 = i;
+		}
+	}
+	if (p1 == 0xff || p2 == 0xff)
+		return;
+
+	// Fast link check: both ports must be Up
+	reg_read_m(RTL837X_REG_LINKS_STS);
+	uint16_t link_mask = (((uint16_t)sfr_data[2]) << 8) | sfr_data[1];
+	if (!((link_mask >> p1) & 1) || !((link_mask >> p2) & 1))
+		return;
+
+	// No other ports may be connected (avoids misdetection in operational network)
+	for (uint8_t i = machine.min_port; i <= machine.max_port; i++) {
+		if (i != p1 && i != p2 && ((link_mask >> i) & 1))
+			return;
+	}
+
+	// Verify loopback by probing packet transfer between p1 and p2
+	if (!probe_loopback(p1, p2))
+		return;
+
+	print_string("\n[Port loopback detected (port 1 <-> port 2)]\n");
+	print_string("[Keep loopback connected for 10s to restore factory defaults]\n");
+
+	const __xdata uint32_t min_hold_ticks = 10UL * SYS_TICK_HZ;
+	const __xdata uint32_t max_hold_ticks = 30UL * SYS_TICK_HZ;
+	const __xdata uint32_t blink_ticks = SYS_TICK_HZ / 10;      // 100 ms
+	const __xdata uint32_t pause_ticks = SYS_TICK_HZ / 2;       // 500 ms
+	__xdata uint32_t start_ticks = ticks;
+	__xdata uint32_t last_blink_step = start_ticks;
+	__xdata uint32_t last_check_ticks = start_ticks;
+	__xdata uint8_t blink_step = 0;
+
+	set_sys_led_state(SYS_LED_ON);
+
+	while (1) {
+		__xdata uint32_t held_ticks = ticks - start_ticks;
+
+		if (held_ticks > max_hold_ticks) {
+			print_string("[Loopback held >30s; continuing normal boot]\n");
+			set_sys_led_state(SYS_LED_ON);
+			return;
+		}
+
+		if (held_ticks >= min_hold_ticks) {
+			print_string("[Loopback held 10s; restoring factory default config]\n");
+			set_sys_led_state(SYS_LED_FAST);
+			flash_default_config();
+			print_string("Resetting chip...\n");
+			delay(1000);
+			reset_chip();
+			return;
+		}
+
+		// Periodic link verification every 500 ms
+		if ((ticks - last_check_ticks) >= (SYS_TICK_HZ / 2)) {
+			last_check_ticks = ticks;
+			reg_read_m(RTL837X_REG_LINKS_STS);
+			link_mask = (((uint16_t)sfr_data[2]) << 8) | sfr_data[1];
+			if (!((link_mask >> p1) & 1) || !((link_mask >> p2) & 1)) {
+				print_string("[Loopback disconnected; continuing normal boot]\n");
+				set_sys_led_state(SYS_LED_ON);
+				return;
+			}
+		}
+
+		// Double blink pattern while loopback is held
+		__xdata uint32_t step_ticks = (blink_step == 3) ? pause_ticks : blink_ticks;
+		if ((ticks - last_blink_step) >= step_ticks) {
+			blink_step = (blink_step + 1) & 0x3;
+			set_sys_led_state((blink_step == 0 || blink_step == 2) ? SYS_LED_ON : SYS_LED_OFF);
+			last_blink_step = ticks;
+		}
+
+		PCON |= 1;
 	}
 }
 
