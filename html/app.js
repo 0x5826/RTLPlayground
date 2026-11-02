@@ -89,6 +89,7 @@ sy_pw_note:"Takes effect immediately; save to flash to keep it after reboot.",sy
 sy_cmd:"CLI command...",sy_send:"Send",sy_startup:"Startup configuration",sy_replayed:"replayed on every boot",
 sy_reload:"Reload from flash",sy_write:"Write to flash",sy_unknown_note:"Unknown lines are highlighted before writing.",
 sy_maint:"Maintenance",sy_reboot:"Reboot switch",sy_factory_reset:"Reset to defaults",sy_lang:"Language",
+sy_flash_used:", used ",sy_flash_card:"Flash storage",sy_flash_total:"Total capacity",sy_flash_active:"Active firmware",sy_flash_web:"Web assets",sy_flash_cfg:"Configuration",sy_flash_ota:"OTA staging",sy_flash_note:"Dual-slot architecture: 512 KiB active firmware and 512 KiB staged recovery space.",
 sy_ip_err:"Invalid IP / netmask / gateway",sy_host_err:"Hostname: 1-23 printable characters, no spaces or quotes",
 sy_net_q:"Apply network settings?",sy_net_d:"The management IP changes to {ip}: this page will need to be reopened there.",
 sy_ip_changed:"IP changed, reconnect at http://{ip}/",sy_dhcp_q:"Switch to DHCP?",
@@ -213,6 +214,7 @@ sy_pw_note:"即時に反映されます。再起動後も保持するにはフ�
 sy_cmd:"CLI コマンド...",sy_send:"送信",sy_startup:"起動設定",sy_replayed:"起動のたびに再実行されます",
 sy_reload:"フラッシュから再読み込み",sy_write:"フラッシュに書き込み",sy_unknown_note:"不明な行は書き込み前に強調表示されます。",
 sy_maint:"メンテナンス",sy_reboot:"スイッチを再起動",sy_factory_reset:"出荷時設定にリセット",sy_lang:"言語",
+sy_flash_used:"、使用済み ",sy_flash_card:"フラッシュストレージ",sy_flash_total:"総容量",sy_flash_active:"実行中ファームウェア",sy_flash_web:"Web アセット",sy_flash_cfg:"設定セクタ",sy_flash_ota:"OTA ステージング",sy_flash_note:"デュアルスロット構造: 512 KiB の実行ファームウェアと 512 KiB の復旧スペース。",
 sy_ip_err:"IP / ネットマスク / ゲートウェイが無効です",sy_host_err:"ホスト名: 1〜23 文字の印字可能文字、空白と引用符は不可",
 sy_net_q:"ネットワーク設定を適用しますか?",sy_net_d:"管理 IP が {ip} に変わります。このページは新しいアドレスで開き直す必要があります。",
 sy_ip_changed:"IP を変更しました。http://{ip}/ に再接続してください",sy_dhcp_q:"DHCP に切り替えますか?",
@@ -339,6 +341,7 @@ sy_pw_note:"立即生效；如需重启后保留请保存到 Flash。",sy_consol
 sy_cmd:"CLI 命令...",sy_send:"发送",sy_startup:"启动配置",sy_replayed:"每次启动时重新执行",
 sy_reload:"从 Flash 重新读取",sy_write:"写入 Flash",sy_unknown_note:"未知行会在写入前高亮显示。",
 sy_maint:"维护",sy_reboot:"重启交换机",sy_factory_reset:"恢复出厂设置",sy_lang:"语言",
+sy_flash_used:"，已用 ",sy_flash_card:"Flash 存储",sy_flash_total:"总容量",sy_flash_active:"运行固件",sy_flash_web:"Web 资源",sy_flash_cfg:"配置扇区",sy_flash_ota:"OTA 固件区",sy_flash_note:"双槽位存储架构：512 KiB 运行固件与 512 KiB 升级暂存救砖空间。",
 sy_ip_err:"IP / 子网掩码 / 网关无效",sy_host_err:"主机名: 1-23 个可打印字符，不能包含空格或引号",
 sy_net_q:"应用网络设置?",sy_net_d:"管理 IP 将变为 {ip}，需要使用新地址重新打开本页面。",
 sy_ip_changed:"IP 已更改，请访问 http://{ip}/ 重新连接",sy_dhcp_q:"切换到 DHCP?",
@@ -463,6 +466,7 @@ sy_pw_note:"Toma efecto inmediatamente; guarda en flash para conservarla tras el
 sy_cmd:"Comando de CLI...",sy_send:"Enviar",sy_startup:"Configuración de inicio",sy_replayed:"reaplicada en cada arranque",
 sy_reload:"Recargar desde flash",sy_write:"Escribir en flash",sy_unknown_note:"Las líneas desconocidas se resaltan antes de escribir.",
 sy_maint:"Mantenimiento",sy_reboot:"Reiniciar switch",sy_factory_reset:"Restablecer valores",sy_lang:"Idioma",
+sy_flash_used:", usado ",sy_flash_card:"Almacenamiento flash",sy_flash_total:"Capacidad total",sy_flash_active:"Firmware activo",sy_flash_web:"Recursos web",sy_flash_cfg:"Configuración",sy_flash_ota:"Espacio OTA",sy_flash_note:"Arquitectura de doble ranura: 512 KiB de firmware activo y 512 KiB de espacio de recuperación.",
 sy_ip_err:"IP / máscara / puerta de enlace no válidos",sy_host_err:"Nombre de host: 1-23 caracteres imprimibles, sin espacios ni comillas",
 sy_net_q:"¿Aplicar ajustes de red?",sy_net_d:"La IP de gestión cambia a {ip}: esta página deberá reabrirse allí.",
 sy_ip_changed:"IP cambiada, reconecta en http://{ip}/",sy_dhcp_q:"¿Cambiar a DHCP?",
@@ -581,6 +585,7 @@ sy_pw_note:"Prends effet immédiatement; Sauvegardez en flash afin de conserver 
 sy_cmd:"Ligne de commande...",sy_send:"Envoyer",sy_startup:"Configuration de démarrage",sy_replayed:"Rejouée à chaque redémarrage",
 sy_reload:"Recharger depuis la mémoire flash",sy_write:"Ecrire en mémoire flash",sy_unknown_note:"Les lignes incorrectes sont mises en évidence avant l'écriture.",
 sy_maint:"Maintenance",sy_reboot:"Redémarre le commutateur",sy_factory_reset:"Réinitialiser",sy_lang:"Langage",
+sy_flash_used:", utilisé ",sy_flash_card:"Stockage flash",sy_flash_total:"Capacité totale",sy_flash_active:"Micrologiciel actif",sy_flash_web:"Ressources web",sy_flash_cfg:"Configuration",sy_flash_ota:"Espace OTA",sy_flash_note:"Architecture à double emplacement : 512 Kio de micrologiciel actif et 512 Kio d'espace de secours.",
 sy_ip_err:"Erreur d'IP / masque réseau / passerelle",sy_host_err:"Nom d'hôte : 1 à 23 caractères, sans espace ni apostrophes",
 sy_net_q:"Appliquer les paramètres réseau?",sy_net_d:"L'adresse IP de  management va devenir {ip}: merci de réouvrir le page depuis cette adresse.",
 sy_ip_changed:"L'adresse IP a changée, reconnectez-vous à http://{ip}/",sy_dhcp_q:"Passer en DHCP?",
@@ -706,6 +711,7 @@ sy_pw_note:"Wirkt sofort; im Flash speichern, damit es nach einem Neustart erhal
 sy_cmd:"CLI-Befehl...",sy_send:"Senden",sy_startup:"Startkonfiguration",sy_replayed:"wird bei jedem Start ausgeführt",
 sy_reload:"Aus dem Flash neu laden",sy_write:"In den Flash schreiben",sy_unknown_note:"Unbekannte Zeilen werden vor dem Schreiben hervorgehoben.",
 sy_maint:"Wartung",sy_reboot:"Switch neu starten",sy_factory_reset:"Werkseinstellungen",sy_lang:"Sprache",
+sy_flash_used:", belegt ",sy_flash_card:"Flash-Speicher",sy_flash_total:"Gesamtkapazität",sy_flash_active:"Aktive Firmware",sy_flash_web:"Web-Ressourcen",sy_flash_cfg:"Konfiguration",sy_flash_ota:"OTA-Bereich",sy_flash_note:"Dual-Slot-Architektur: 512 KiB aktive Firmware und 512 KiB Bereitstellungsbereich.",
 sy_ip_err:"Ungültige IP / Netzmaske / Gateway",sy_host_err:"Hostname: 1-23 druckbare Zeichen, keine Leerzeichen oder Anführungszeichen",
 sy_net_q:"Netzwerkeinstellungen übernehmen?",sy_net_d:"Die Management-IP ändert sich auf {ip}: Diese Seite muss dort neu geöffnet werden.",
 sy_ip_changed:"IP geändert, neu verbinden unter http://{ip}/",sy_dhcp_q:"Auf DHCP umstellen?",
@@ -1136,7 +1142,11 @@ function renderInfo(){
   m.forEach(function(r){
     var v=S.info[r[1]];
     if(v==null||v==="")return;
-    tb.appendChild(h("tr",null,[h("td",{class:"mut",text:t(r[0])}),h("td",{class:"mono",text:String(v)})]));
+    var displayVal = String(v);
+    if(r[1]==="flash_size" && S.info.flash_used){
+      displayVal += t("sy_flash_used") + S.info.flash_used;
+    }
+    tb.appendChild(h("tr",null,[h("td",{class:"mut",text:t(r[0])}),h("td",{class:"mono",text:displayVal})]));
   });
   if(S.info.hostname){
     $("brandname").textContent=$("brandname").title=document.title=S.info.hostname;
@@ -1144,6 +1154,8 @@ function renderInfo(){
     try{localStorage.setItem("rtl_host",S.info.hostname);}catch(e){}
   }
   if(S.info.sw_ver)$("fver").textContent="RTLPlayground "+S.info.sw_ver;
+  if($("sy-fl-total"))$("sy-fl-total").textContent=S.info.flash_size||"-";
+  if($("sy-fl-used"))$("sy-fl-used").textContent=S.info.flash_used||"277 KB";
 }
 function pollInfo(){
   return getJSON("/information.json").then(function(j){S.info=j;renderInfo()});
@@ -2249,11 +2261,40 @@ function cfgLongLine(v){
 function cfgBytes(){
   var v=$("cfgedit").value,n=new Blob([v]).size;
   var el=$("cfgbytes");
+  var warnEl=$("cfgwarn");
+  var longErr=cfgLongLine(v);
   el.textContent=n+" / 2048 "+t("sy_bytes");
-  el.style.color=(n>2048||cfgLongLine(v))?"var(--bad)":"";
+  el.style.color=(n>2048||longErr)?"var(--bad)":"";
+
+  var ls=v.split("\n");
+  var numHtml=[];
+  for(var i=0;i<ls.length;i++){
+    var lineSize=new Blob([ls[i]]).size;
+    if(lineSize>126){
+      numHtml.push("<span style='color:var(--bad);font-weight:bold'>"+(i+1)+"</span>");
+    } else {
+      numHtml.push("<span>"+(i+1)+"</span>");
+    }
+  }
+  if($("cfglines"))$("cfglines").innerHTML=numHtml.join("<br>");
+
+  if(warnEl){
+    if(n>2048){
+      warnEl.style.display="block";
+      warnEl.textContent=t("cw_toolarge");
+    } else if(longErr){
+      warnEl.style.display="block";
+      warnEl.textContent=t("cw_longline").replace("{n}",longErr.n).replace("{m}",longErr.m);
+    } else {
+      warnEl.style.display="none";
+    }
+  }
   return n;
 }
 $("cfgedit").addEventListener("input",cfgBytes);
+$("cfgedit").addEventListener("scroll",function(){
+  if($("cfglines"))$("cfglines").scrollTop=$("cfgedit").scrollTop;
+});
 $("cfgreload").addEventListener("click",cfgReload);
 $("cfgwrite").addEventListener("click",function(){
   writeConfig($("cfgedit").value,t("cw_title"));

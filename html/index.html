@@ -471,10 +471,30 @@ button.danger{background:var(--bad);color:#fff;border-color:transparent}
             </select></label>
           <p class="small mut" data-i18n="sy_display_note">Stored in this browser only.</p>
         </div>
+        <div class="card"><h2 data-i18n="sy_flash_card">Flash storage</h2>
+          <table style="width:100%;font-size:13px;border-collapse:collapse">
+            <tbody>
+              <tr><td class="mut" style="padding:4px 0" data-i18n="sy_flash_total">Total capacity</td><td class="mono" style="text-align:right" id="sy-fl-total">-</td></tr>
+              <tr><td class="mut" style="padding:4px 0" data-i18n="sy_flash_active">Active firmware</td><td class="mono" style="text-align:right" id="sy-fl-used">277 KB</td></tr>
+              <tr><td class="mut" style="padding:4px 0">Bank 0 (Base)</td><td class="mono" style="text-align:right">16 KiB / 16 KiB</td></tr>
+              <tr><td class="mut" style="padding:4px 0">Bank 1 (Net/PHY)</td><td class="mono" style="text-align:right">48 KiB / 48 KiB</td></tr>
+              <tr><td class="mut" style="padding:4px 0">Bank 2 (App/CLI)</td><td class="mono" style="text-align:right">48 KiB / 48 KiB</td></tr>
+              <tr><td class="mut" style="padding:4px 0">Bank 3 (Boot/Ext)</td><td class="mono" style="text-align:right">31 KiB / 48 KiB</td></tr>
+              <tr><td class="mut" style="padding:4px 0" data-i18n="sy_flash_web">Web assets</td><td class="mono" style="text-align:right">58 KiB</td></tr>
+              <tr><td class="mut" style="padding:4px 0" data-i18n="sy_flash_cfg">Configuration</td><td class="mono" style="text-align:right">4 KiB (0x70000)</td></tr>
+              <tr><td class="mut" style="padding:4px 0" data-i18n="sy_flash_ota">OTA staging</td><td class="mono" style="text-align:right">512 KiB (0x80000)</td></tr>
+            </tbody>
+          </table>
+          <p class="small mut" style="margin-top:8px" data-i18n="sy_flash_note">Dual-slot architecture: 512 KiB active firmware and 512 KiB staged recovery space.</p>
+        </div>
       </div>
       <div class="card" style="margin-top:16px"><h2><span data-i18n="sy_startup">Startup configuration</span>
         <span class="hint"><span id="cfgbytes"></span>, <span data-i18n="sy_replayed">replayed on every boot</span></span></h2>
-        <textarea class="cfg" id="cfgedit" spellcheck="false"></textarea>
+        <div class="cfg-wrap" style="display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--bg)">
+          <div id="cfglines" style="user-select:none;padding:8px 6px;text-align:right;background:rgba(128,128,128,0.1);color:rgba(128,128,128,0.7);font-family:monospace;font-size:12px;line-height:1.5;overflow:hidden;min-width:32px">1</div>
+          <textarea class="cfg" id="cfgedit" spellcheck="false" style="border:none;flex:1;resize:vertical;font-family:monospace;font-size:12px;line-height:1.5;padding:8px;outline:none"></textarea>
+        </div>
+        <div id="cfgwarn" class="small" style="color:var(--bad);margin-top:6px;display:none"></div>
         <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
           <button class="ctl" id="cfgreload" data-i18n="sy_reload">Reload from flash</button>
           <button class="ctl pri" id="cfgwrite" data-i18n="sy_write">Write to flash</button>

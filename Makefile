@@ -147,6 +147,7 @@ $(VERSION_HEADER): FORCE
 	@printf '%s\n' "#ifndef VERSION_H" "#define VERSION_H" \
 		"#define VERSION_SW \"$(VERSION_EXTENSION)\"" \
 		"#define BUILD_DATE \"$(BUILD_DATE)\"" \
+		"#define FLASH_USED_STR \"277 KB\"" \
 		"#endif" > $(VERSION_HEADER).tmp
 	@cmp -s $(VERSION_HEADER).tmp $(VERSION_HEADER) \
 		&& rm -f $(VERSION_HEADER).tmp \
