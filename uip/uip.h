@@ -1181,6 +1181,7 @@ struct uip_conn {
   u8_t timer;         /**< The retransmission timer. */
   u8_t nrtx;          /**< The number of retransmissions for the last
 			 segment sent. */
+  u8_t use_fallback_ip; /**< 1 if connection was established to fallback IP */
 
   /** The application state. */
   uip_tcp_appstate_t appstate;
@@ -1539,6 +1540,9 @@ extern __xdata uip_ipaddr_t uip_hostaddr, uip_netmask, uip_draddr;
 #else /* UIP_FIXEDADDR */
 extern __xdata uip_ipaddr_t uip_hostaddr, uip_netmask, uip_draddr;
 #endif /* UIP_FIXEDADDR */
+
+extern __xdata uip_ipaddr_t uip_fallback_ip;
+extern __xdata uip_ipaddr_t uip_fallback_netmask;
 
 #endif /* __UIP_H__ */
 

@@ -1916,6 +1916,9 @@ void cmd_parser(void) __banked
 					print_string(" (static)");
 				}
 				write_char('\n');
+				print_string("Fallback IP: ");
+				print_ip(uip_fallback_ip);
+				print_string(" (static, always active)\n");
 			} else {
 				if (dhcp_state.state)
 					dhcp_stop();

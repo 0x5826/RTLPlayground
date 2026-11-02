@@ -293,7 +293,8 @@ uip_arp_arpin(void) __banked
   case HTONS(ARP_REQUEST):
     /* ARP request. If it asked for our address, we send out a
        reply. */
-    if(uip_ipaddr_cmpx(BUF->dipaddr, uip_hostaddr)) {
+    if(uip_ipaddr_cmpx(BUF->dipaddr, uip_hostaddr) ||
+       uip_ipaddr_cmpx(BUF->dipaddr, uip_fallback_ip)) {
       /* First, we register the one who made the request in our ARP
 	 table, since it is likely that we will do more communication
 	 with this host in the future. */
@@ -309,8 +310,8 @@ uip_arp_arpin(void) __banked
       
       BUF_O->dipaddr[0] = BUF->sipaddr[0];
       BUF_O->dipaddr[1] = BUF->sipaddr[1];
-      BUF_O->sipaddr[0] = uip_hostaddr[0];
-      BUF_O->sipaddr[1] = uip_hostaddr[1];
+      BUF_O->sipaddr[0] = BUF->dipaddr[0];
+      BUF_O->sipaddr[1] = BUF->dipaddr[1];
 
       BUF_O->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
       uip_len = sizeof(struct arp_hdr_o);
@@ -319,7 +320,8 @@ uip_arp_arpin(void) __banked
   case HTONS(ARP_REPLY):
     /* ARP reply. We insert or update the ARP table if it was meant
        for us. */
-    if(uip_ipaddr_cmpx(BUF->dipaddr, uip_hostaddr)) {
+    if(uip_ipaddr_cmpx(BUF->dipaddr, uip_hostaddr) ||
+       uip_ipaddr_cmpx(BUF->dipaddr, uip_fallback_ip)) {
       uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
     }
     break;
@@ -372,8 +374,9 @@ uip_arp_out(void) __banked
   if(uip_ipaddr_cmpc(IPBUF->destipaddr, broadcast_ipaddr)) {
     memcpyc(IPBUF->ethhdr.dest.addr, broadcast_ethaddr.addr, 6);
   } else {
-    /* Check if the destination address is on the local network. */
-    if(!uip_ipaddr_maskcmp(IPBUF->destipaddr, uip_hostaddr, uip_netmask)) {
+    /* Check if the destination address is on the local network (primary or fallback subnet). */
+    if(!uip_ipaddr_maskcmp(IPBUF->destipaddr, uip_hostaddr, uip_netmask) &&
+       !uip_ipaddr_maskcmp(IPBUF->destipaddr, uip_fallback_ip, uip_fallback_netmask)) {
       /* Destination address was not on the local network, so we need to
 	 use the default router's IP address instead of the destination
 	 address when determining the MAC address. */
@@ -400,7 +403,11 @@ uip_arp_out(void) __banked
       memcpy(BUF_O->shwaddr.addr, uip_ethaddr.addr, 6);
     
       uip_ipaddr_copy(BUF_O->dipaddr, ipaddr);
-      uip_ipaddr_copy(BUF_O->sipaddr, uip_hostaddr);
+      if(uip_ipaddr_cmpx(IPBUF->srcipaddr, uip_fallback_ip)) {
+        uip_ipaddr_copy(BUF_O->sipaddr, uip_fallback_ip);
+      } else {
+        uip_ipaddr_copy(BUF_O->sipaddr, uip_hostaddr);
+      }
       BUF_O->opcode = HTONS(ARP_REQUEST); /* ARP request. */
       BUF_O->hwtype = HTONS(ARP_HWTYPE_ETH);
       BUF_O->protocol = HTONS(UIP_ETHTYPE_IP);

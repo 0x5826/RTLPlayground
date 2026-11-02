@@ -90,6 +90,8 @@ uint16_t lldp_logical_port_status;
 
 
 uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
+uip_ipaddr_t uip_fallback_ip = { 0xc0a8, 0x0af7 };
+uip_ipaddr_t uip_fallback_netmask = { 0xffff, 0xff00 };
 struct uip_eth_addr uip_ethaddr = { .addr = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 } };
 
 /* ---- leaf calls into subsystems not under test ---- */
