@@ -2522,8 +2522,10 @@ $("fwfile").addEventListener("change",function(){
 $("fwup").addEventListener("click",function(){
   if(!fwBuf)return;
   confirmModal(t("fw_q"),(fwOther?t("fw_other",{m:S.info.hw_ver})+" ":"")+t("fw_d"),function(){
+    statusPoller.stop();
+    var blob=new Blob([fwBuf],{type:"application/octet-stream"});
     var form=new FormData();
-    form.append("uploadedfile",fwBuf,fwBuf.name);
+    form.append("uploadedfile",blob,fwBuf.name);
     var xhr=new XMLHttpRequest();
     var prog=$("fwprog"),st=$("fwstat");
     var sent=false,settled=false,t0=Date.now(),pct=0;
@@ -2556,10 +2558,11 @@ $("fwup").addEventListener("click",function(){
         var why=(xhr.responseText||"").trim().split("\n")[0];
         st.textContent="\u2715 "+t("fw_rejected")+" (HTTP "+xhr.status+(why?": "+why:"")+")";
         $("fwup").disabled=false;
+        if(curTab!=="fw")statusPoller.start();
       }
     })};
     xhr.onerror=function(){settle(function(){
-      if(!sent){st.textContent=t("fw_lost");$("fwup").disabled=false;return;}
+      if(!sent){st.textContent=t("fw_lost");$("fwup").disabled=false;if(curTab!=="fw")statusPoller.start();return;}
       fwSettle(st,false);
     })};
     xhr.open("POST","/upload");
@@ -2604,7 +2607,10 @@ function fwSettle(st,knownGood){
   }
   setTimeout(probe,3000);
 }
-tabHooks.fw={};
+tabHooks.fw={
+  enter:function(){statusPoller.stop()},
+  leave:function(){statusPoller.start()}
+};
 
 window.addEventListener("hashchange",function(){
   var id=location.hash.slice(1);

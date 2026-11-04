@@ -1634,8 +1634,6 @@ void main(void)
 	uip_ipaddr(&uip_hostaddr, ownIP[0], ownIP[1], ownIP[2], ownIP[3]);
 	uip_ipaddr(&uip_draddr, gatewayIP[0], gatewayIP[1], gatewayIP[2], gatewayIP[3]);
 	uip_ipaddr(&uip_netmask, netmask[0], netmask[1], netmask[2], netmask[3]);
-	uip_ipaddr(&uip_fallback_ip, 192, 168, 10, 247);
-	uip_ipaddr(&uip_fallback_netmask, 255, 255, 255, 0);
 	uip_ethaddr.addr[0] = 0xff;
 	if (machine.mac_flash_offset) {
 		flash_region.addr = machine.mac_flash_offset;

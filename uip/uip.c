@@ -121,7 +121,6 @@ __xdata uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
 #endif //UIP_FIXEDADDR */
 
 __xdata uip_ipaddr_t uip_hostaddr, uip_draddr, uip_netmask;
-__xdata uip_ipaddr_t uip_fallback_ip, uip_fallback_netmask;
 
 static __code const uip_ipaddr_t all_ones_addr =
 #if UIP_CONF_IPV6
@@ -952,8 +951,7 @@ uip_process(u8_t flag) __banked
     /* Check if we have a DHCP packet, otherwise check if the packet is destined for our IP address. */
 #if !UIP_CONF_IPV6
     if(!(BUF->proto == UIP_PROTO_UDP && UDPBUF->destport == HTONS(DHCPC_CLIENT_PORT))) {
-      if(!uip_ipaddr_cmpx(BUF->destipaddr, uip_hostaddr) &&
-         !uip_ipaddr_cmpx(BUF->destipaddr, uip_fallback_ip)) {
+      if(!uip_ipaddr_cmpx(BUF->destipaddr, uip_hostaddr)) {
         UIP_STAT(++uip_stat.ip.drop);
         goto drop;
       }
@@ -1032,13 +1030,8 @@ uip_process(u8_t flag) __banked
   ICMPBUF->type = ICMP_ECHO_REPLY;
 
   /* Swap IP addresses. */
-  if(uip_ipaddr_cmpx(BUF->destipaddr, uip_fallback_ip)) {
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, uip_fallback_ip);
-  } else {
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
-  }
+  uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
+  uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
 
   UIP_STAT(++uip_stat.icmp.sent);
   goto send;
@@ -1300,13 +1293,8 @@ uip_process(u8_t flag) __banked
   BUF->destport = tmp16;
   
   /* Swap IP addresses. */
-  if(uip_ipaddr_cmpx(BUF->destipaddr, uip_fallback_ip)) {
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, uip_fallback_ip);
-  } else {
-    uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
-    uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
-  }
+  uip_ipaddr_copy(BUF->destipaddr, BUF->srcipaddr);
+  uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
   
   /* And send out the RST packet! */
   goto tcp_send_noconn;
@@ -1353,7 +1341,6 @@ uip_process(u8_t flag) __banked
   uip_connr->lport = BUF->destport;
   uip_connr->rport = BUF->srcport;
   uip_ipaddr_copy(uip_connr->ripaddr, BUF->srcipaddr);
-  uip_connr->use_fallback_ip = uip_ipaddr_cmpx(BUF->destipaddr, uip_fallback_ip) ? 1 : 0;
   uip_connr->tcpstateflags = UIP_SYN_RCVD;
 
   uip_connr->snd_nxt[0] = iss[0];
@@ -1888,11 +1875,7 @@ uip_process(u8_t flag) __banked
   BUF->srcport  = uip_connr->lport;
   BUF->destport = uip_connr->rport;
 
-  if(uip_connr->use_fallback_ip) {
-    uip_ipaddr_copy(BUF->srcipaddr, uip_fallback_ip);
-  } else {
-    uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
-  }
+  uip_ipaddr_copy(BUF->srcipaddr, uip_hostaddr);
   uip_ipaddr_copy(BUF->destipaddr, uip_connr->ripaddr);
 
   if(uip_connr->tcpstateflags & UIP_STOPPED) {

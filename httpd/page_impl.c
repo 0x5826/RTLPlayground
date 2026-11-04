@@ -312,7 +312,6 @@ void send_basic_info(void)
 	slen += strtox(outbuf + slen, "\",\"flash_used\":\"");
 	string_to_html(FLASH_USED_STR);
 #endif
-	slen += strtox(outbuf + slen, "\",\"fallback_ip\":\"192.168.10.247");
 
 	if (machine.n_sfp) {
 		slen += strtox(outbuf + slen, "\",\"sfp_slot_0\":\"");

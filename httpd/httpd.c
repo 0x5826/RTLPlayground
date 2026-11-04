@@ -450,18 +450,24 @@ static uint16_t preamble_payload_start(uint16_t n)
 {
 	uint16_t pos;
 
+	// Prefer locating application/octet-stream first if present
 	for (pos = 0; pos + 24 <= n; pos++) {
-		if (strstart(&config_buf[pos], "application/octet-stream"))
-			break;
+		if (strstart(&config_buf[pos], "application/octet-stream")) {
+			pos += 24;
+			while (pos + 3 < n && !strstart(&config_buf[pos], "\r\n\r\n"))
+				pos++;
+			if (pos + 3 >= n)
+				return 0;
+			return pos + 4;
+		}
 	}
-	if (pos + 24 > n)
-		return 0;
-	pos += 24;
-	while (pos + 3 < n && !strstart(&config_buf[pos], "\r\n\r\n"))
-		pos++;
-	if (pos + 3 >= n)
-		return 0;
-	return pos + 4;
+
+	// Fallback: locate end of part header (\r\n\r\n)
+	for (pos = 0; pos + 3 < n; pos++) {
+		if (strstart(&config_buf[pos], "\r\n\r\n"))
+			return pos + 4;
+	}
+	return 0;
 }
 
 
